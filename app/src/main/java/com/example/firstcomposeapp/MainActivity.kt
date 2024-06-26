@@ -15,16 +15,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.firstcomposeapp.ui.theme.FirstComposeAppTheme
@@ -35,17 +47,87 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FirstComposeAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column (
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
-                        Interaksi()
-                    }
-                }
+                MyBottomNavBar()
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    Column (
+//                        modifier = Modifier.padding(innerPadding)
+//                    ) {
+//                        Interaksi()
+//                    }
+//                }
             }
         }
     }
 }
+
+data class BottomNav(val icon : BottomNavIcon, var label : String)
+
+sealed class BottomNavIcon {
+    data class BottomNavImageVector(var iconImageVector : ImageVector) : BottomNavIcon()
+    data class BottomNavPainter(var iconPainter : Int) : BottomNavIcon()
+}
+
+@Composable
+fun MyBottomNavBar() {
+    var bottomNavList by remember {
+        mutableStateOf(
+            listOf(
+                BottomNav(BottomNavIcon.BottomNavImageVector(Icons.Default.Home), "Home"),
+                BottomNav(BottomNavIcon.BottomNavPainter(R.drawable.ic_note), "Note"),
+                BottomNav(BottomNavIcon.BottomNavImageVector(Icons.Default.Person), "Profile")
+            )
+        )
+    }
+
+    var halamanSaatIni by remember {
+        mutableStateOf("Home")
+    }
+
+    var selectedTab by remember {
+        mutableIntStateOf(0)
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            NavigationBar {
+                bottomNavList.forEachIndexed { index, it ->
+                    NavigationBarItem(
+                        icon = {
+                            when (it.icon) {
+                                is BottomNavIcon.BottomNavImageVector -> Icon(imageVector = it.icon.iconImageVector, contentDescription = "Home")
+                                is BottomNavIcon.BottomNavPainter ->
+                                    Icon(painter = painterResource(id = it.icon.iconPainter), contentDescription = "Home")
+                            }
+
+                        },
+                        label = { Text(text = it.label) },
+                        onClick = { selectedTab = index },
+                        selected = selectedTab == index
+                    )
+                }
+            }
+        }
+    ) {
+        Column (modifier = Modifier.padding(it)) {
+//            Text(text = "Selected Tab : $selectedTab")
+            Text(text = "Anda Berada Pada Halaman $halamanSaatIni")
+            Button(onClick = { /*TODO*/ }) {
+                Text(text = "Note 1")
+            }
+        }
+    }
+
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MyBottomNavBarPreview() {
+    FirstComposeAppTheme {
+        MyBottomNavBar()
+    }
+}
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -82,7 +164,11 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun Interaksi() {
     var counter by remember {
-        mutableIntStateOf(0)
+        mutableFloatStateOf(0.0f)
+    }
+
+    var nama by remember {
+        mutableStateOf("")
     }
 
     Column {
